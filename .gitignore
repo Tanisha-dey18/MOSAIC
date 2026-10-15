@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Data: never commit raw or processed datasets (licensing + size)
+datasets/*
+!datasets/README.md
+!datasets/.gitkeep
+storage/
+
+# Model artifacts and generated outputs (reproducible from code)
+artifacts/*
+!artifacts/.gitkeep
+reports/*
+!reports/.gitkeep
+!reports/README.md
+# Keep the main experiment run (derived results of an open dataset) for reproducibility checks.
+!reports/experiments/
+reports/experiments/*
+!reports/experiments/main/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

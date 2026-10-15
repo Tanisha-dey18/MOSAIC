@@ -1,0 +1,10 @@
+**/node_modules
+**/__pycache__
+**/.pytest_cache
+frontend/dist
+datasets
+storage
+artifacts
+reports
+.env
+.git
