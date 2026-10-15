@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
-import { useApi } from "../lib/hooks";
+import { useApi, usePolling } from "../lib/hooks";
 import { dateTime, fmt, int, methodLabel } from "../lib/format";
 import { Badge, Card, ErrorState, Loading, NoDataset, Notice, PageHeader, Stat } from "../components/ui";
 
@@ -11,6 +11,11 @@ export default function Dashboard() {
   const runs = useApi(() => api.trainingRuns(), []);
   const anomalies = useApi(() => api.anomalies({ page_size: 8 }), []);
   const experiments = useApi(() => api.experiments(), []);
+  // A freshly started server may still be downloading/ingesting the dataset or training: keep the page live.
+  const preparing = !!meta.data && (!meta.data.configured
+    ? ["pending", "processing"].includes(meta.data.latest_attempt?.status ?? "")
+    : (runs.data?.items ?? []).some((r) => r.status === "queued" || r.status === "running"));
+  usePolling(() => { meta.reload(); models.reload(); runs.reload(); }, 5000, preparing);
 
   if (meta.loading) return <Loading />;
   if (meta.error) return <ErrorState error={meta.error} onRetry={meta.reload} />;
@@ -24,6 +29,9 @@ export default function Dashboard() {
       />
       {!m.configured ? (
         <>
+          {preparing && (
+            <Notice>The server is preparing the dataset (download, quality checks, feature extraction). This page refreshes automatically; it usually takes a few minutes after a restart.</Notice>
+          )}
           {m.latest_attempt && (
             <Notice tone={m.latest_attempt.status === "failed" ? "warn" : "info"}>
               Latest ingestion attempt: <b>{m.latest_attempt.status}</b> {m.latest_attempt.progress ? `(${m.latest_attempt.progress})` : ""}

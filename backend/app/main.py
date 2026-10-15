@@ -30,6 +30,11 @@ async def lifespan(_: FastAPI):
     settings = get_settings()
     configure_logging(settings.log_level)
     settings.ensure_dirs()
+    if settings.bootstrap:
+        from app.services import jobs
+        from app.services.bootstrap import run_bootstrap
+
+        jobs.submit(run_bootstrap)  # background thread: health answers while data is prepared
     yield
 
 

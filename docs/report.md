@@ -581,7 +581,7 @@ See [api.md](api.md). Interactive OpenAPI documentation is served at `/docs` (Sw
 
 ## 29. Testing report
 
-See [testing.md](testing.md). Summary: **91 automated tests** (66 ML unit tests and 25 API integration tests) cover ingestion, validation, preprocessing, features, leakage rules, all detectors, serialisation and artifact integrity, the API, the database (through the real Alembic migration), uploads and security. All 91 passed on the development machine (pytest 9.1.1, Python 3.13.15). The frontend passes `tsc` strict type-checking and builds with Vite.
+See [testing.md](testing.md). Summary: **93 automated tests** (66 ML unit tests and 27 API integration tests) cover ingestion, validation, preprocessing, features, leakage rules, all detectors, serialisation and artifact integrity, the API, the database (through the real Alembic migration), uploads and security. All 93 passed on the development machine (pytest 9.1.1, Python 3.13.15). The frontend passes `tsc` strict type-checking and builds with Vite.
 
 ## 30. Reproducibility instructions
 

@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     log_level: str = Field("INFO", alias="LOG_LEVEL")
     # Run background jobs inline (used by the test-suite for determinism).
     jobs_sync: bool = Field(False, alias="JOBS_SYNC")
+    # Download, ingest and train automatically at start-up (for hosts without persistent disks).
+    bootstrap: bool = Field(False, alias="MOSAIC_BOOTSTRAP")
+    bootstrap_methods: str = Field(
+        "hr_rule,robust_z_global,robust_z_personal,robust_z_rolling,iforest_global,iforest_personal,"
+        "ocsvm_global,ocsvm_personal,autoencoder_global,autoencoder_personal,arousal_z_rolling",
+        alias="MOSAIC_BOOTSTRAP_METHODS")
 
     @field_validator("storage_dir", "datasets_dir", "reports_dir", mode="before")
     @classmethod
@@ -34,6 +40,10 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def bootstrap_method_list(self) -> list[str]:
+        return [m.strip() for m in self.bootstrap_methods.split(",") if m.strip()]
 
     @property
     def processed_dir(self) -> Path:

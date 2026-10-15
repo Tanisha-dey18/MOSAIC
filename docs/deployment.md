@@ -1,6 +1,38 @@
 # Deployment
 
-> **Status:** MOSAIC has **not** been deployed to any cloud service as part of this project. The configuration below was written for deployment but has not been verified in production. Docker was installed on the development machine but its daemon was not running, so the Docker images were **not built or run**. Follow the verification checklist at the end after deploying.
+> **Status:** The frontend has been deployed by the author to https://mosaicappn.netlify.app. The backend start-up bootstrap (download → ingest → train) was tested locally, from an empty database, in production mode. The Hugging Face Docker image itself has **not** been built here, because the Docker daemon was not running on the development machine. Follow the verification checklist at the end after deploying.
+
+## Recommended free setup: Hugging Face Spaces (backend) + Netlify (frontend)
+
+The live frontend is at https://mosaicappn.netlify.app. Netlify serves only static files, so the backend runs as a free **Hugging Face Docker Space** (2 vCPU, 16 GB RAM). Render's free tier (512 MB RAM, 0.1 CPU) is too small for this ML stack.
+
+### Step 1: create the backend Space (about 10 minutes, mostly automatic)
+
+1. Sign in at https://huggingface.co and choose **New → Space**.
+2. Enter a name such as `mosaic-api`, select the **Docker** SDK (blank template) and **CPU basic (free)** hardware, and make the Space **public**. A private Space cannot be called from the Netlify site.
+3. In the Space, open **Files → Add file → Create a new file** twice. Create `Dockerfile` and `README.md` with the contents of [`deploy/huggingface/Dockerfile`](../deploy/huggingface/Dockerfile) and [`deploy/huggingface/README.md`](../deploy/huggingface/README.md).
+4. The Space builds from the public GitHub repository. On first start it downloads the PhysioNet dataset (checksums verified), processes it and trains the default models. The API answers immediately; data and models appear over several minutes.
+5. Note the Space's URL, `https://<hf-username>-mosaic-api.hf.space`, and check it:
+
+   ```bash
+   curl https://<hf-username>-mosaic-api.hf.space/api/health
+   ```
+
+   Expect `"status":"ok"`; `"dataset"` becomes `configured: true` once ingestion finishes.
+
+Free Spaces have no persistent disk and sleep after a period without visits. After every restart, the bootstrap rebuilds the data and models automatically. Trained models, detections and reports created in the app are lost on restart. To keep them, add persistent storage or move to a host with a disk (section 2 below).
+
+If the Netlify site URL changes, set **Settings → Variables → `CORS_ORIGINS`** in the Space to the new `https://…netlify.app` origin, then restart the Space. After pushing new code to GitHub, use **Settings → Factory rebuild**.
+
+### Step 2: point the Netlify site at the backend
+
+1. In Netlify, open the site and go to **Site configuration → Environment variables → Add a variable**.
+2. Set `VITE_API_BASE_URL` = `https://<hf-username>-mosaic-api.hf.space` (no trailing slash).
+3. Choose **Deploys → Trigger deploy → Deploy site**. The URL is compiled into the build, so a redeploy is required.
+
+The build now **fails on purpose** if `VITE_API_BASE_URL` is missing, points to localhost, or is not `https`. This prevents deploying a site that cannot reach any backend, which is what happened with the first deployment: it was built with the default `http://localhost:8000`.
+
+---
 
 ## Architecture
 

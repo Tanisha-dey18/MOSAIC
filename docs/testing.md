@@ -23,7 +23,7 @@ npm --prefix frontend run build
 Windows 11, Python 3.13.15, pytest 9.1.1:
 
 ```
-================== 91 passed, 1 warning in 50.56s ==================
+================== 93 passed, 1 warning in 79.86s ==================
 ```
 
 The single warning is a Starlette deprecation notice about the `httpx` test client; it does not affect the results. The frontend passed `tsc --noEmit` (strict mode) and `vite build` without errors.

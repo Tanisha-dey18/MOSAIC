@@ -233,3 +233,13 @@ def test_production_cors_is_allow_list_only(env, monkeypatch):
     finally:
         monkeypatch.setenv("MOSAIC_ENV", "test")
         get_settings.cache_clear()
+
+
+def test_bootstrap_is_idempotent_when_data_and_models_exist(client, trained):
+    from app.services.bootstrap import run_bootstrap
+
+    before = len(client.get("/api/datasets").json())
+    runs_before = client.get("/api/models/training-runs").json()["total"]
+    run_bootstrap()  # must not download, re-ingest or retrain
+    assert len(client.get("/api/datasets").json()) == before
+    assert client.get("/api/models/training-runs").json()["total"] == runs_before

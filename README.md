@@ -108,6 +108,10 @@ docker compose up --build
 
 The UI is at http://localhost:8080 and the API at http://localhost:8000/docs. Ingest from the Data Explorer page; `./datasets` is mounted read-only into the backend.
 
+## Deploying (Netlify + Hugging Face Spaces)
+
+The frontend is static and runs on Netlify. The Python backend runs separately; a free Hugging Face Docker Space works and builds directly from this repository (files in `deploy/huggingface/`). Then set `VITE_API_BASE_URL` in Netlify and redeploy. Step-by-step guide: [docs/deployment.md](docs/deployment.md).
+
 ## Repository layout
 
 ```

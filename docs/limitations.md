@@ -8,7 +8,7 @@
 | Ingestion of all 100 sessions | API ingestion → dataset `ready`, 20,654 windows |
 | Training and inference of all detector types | 13 methods in the experiment suite; 6 models trained via the API and CLI |
 | Experiments E1–E9 on real data | `reports/experiments/main/` (runtime 1,060 s) |
-| Automated tests | 91 passed (`python -m pytest`) |
+| Automated tests | 93 passed (`python -m pytest`) |
 | Alembic migration | upgrade, downgrade and upgrade on SQLite; executed by the test fixture |
 | Frontend | `tsc` strict and `vite build` pass; Dashboard, Monitoring and Explainability checked in a browser against the live backend with real data |
 | Report generation | HTML report with embedded figures generated from run `main` |
@@ -20,7 +20,7 @@
 |---|---|
 | Docker images and `docker compose up` | The Docker daemon was not running on the development machine |
 | PostgreSQL | No PostgreSQL server was available; tests used SQLite. The migration is dialect-neutral but was not executed on PostgreSQL |
-| Cloud deployment (Netlify and backend host) | Not performed. There is no deployed URL |
+| Backend cloud deployment | Frontend deployed to Netlify by the author. The Hugging Face Space files and the start-up bootstrap are prepared, and the bootstrap was tested locally from an empty state; the Space itself was not built here |
 | ZIP upload of the full PhysioNet release through the UI | Code path tested with small archives; the 70 MB archive was not uploaded through the browser |
 | Literature DOIs other than the dataset references | Listed from standard sources; verify before submission |
 
