@@ -1,12 +1,16 @@
 // Typed client for the MOSAIC FastAPI backend.
-// The base URL comes from VITE_API_BASE_URL at build time (never hard-coded for production).
+// The backend address is resolved at runtime (see backend.ts): link parameter, remembered choice,
+// VITE_API_BASE_URL, or localhost during development.
 import type {
   AnomalyEvent, BaselineResponse, DatasetMetadata, DatasetRecord, DetectionResult, Experiment, ExperimentListItem,
   Explanation, Health, MethodInfo, ModelMetrics, ModelVersion, Page, ParticipantsResponse, QualityResponse, Report,
   SessionInfo, SignalsResponse, TrainingRun,
 } from "./types";
 
-export const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") || "http://localhost:8000";
+import { getApiBase } from "./backend";
+
+/** Base URL for links (figures, downloads); empty when no backend is configured. */
+const base = () => getApiBase() ?? "";
 
 export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string, public details?: unknown) {
@@ -15,11 +19,15 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const apiBase = getApiBase();
+  if (!apiBase) {
+    throw new ApiError(0, "backend_not_configured", "This site is not connected to a MOSAIC backend yet.");
+  }
   let res: Response;
   try {
-    res = await fetch(`${API_BASE}${path}`, init);
+    res = await fetch(`${apiBase}${path}`, init);
   } catch {
-    throw new ApiError(0, "network_error", `Cannot reach the MOSAIC API at ${API_BASE}. Is the backend running?`);
+    throw new ApiError(0, "network_error", `Cannot reach the MOSAIC API at ${apiBase}. Is the backend running?`);
   }
   if (!res.ok) {
     let code = "http_error";
@@ -95,9 +103,9 @@ export const api = {
     request<Explanation>("/api/explain", json({ model_id, session_key, window_index })),
   experiments: () => request<{ runs: ExperimentListItem[] }>("/api/experiments"),
   experiment: (id: string) => request<Experiment>(`/api/experiments/${encodeURIComponent(id)}`),
-  figureUrl: (runId: string, name: string) => `${API_BASE}/api/experiments/${encodeURIComponent(runId)}/figures/${encodeURIComponent(name)}`,
+  figureUrl: (runId: string, name: string) => `${base()}/api/experiments/${encodeURIComponent(runId)}/figures/${encodeURIComponent(name)}`,
   runExperiments: (quick: boolean) => request<{ run_id: string; status: string }>("/api/experiments/run", json({ quick })),
   reports: () => request<Page<Report>>("/api/reports"),
   createReport: (title: string, experiment_run_id?: string) => request<Report>("/api/reports", json({ title, experiment_run_id, include_models: true })),
-  reportUrl: (id: number) => `${API_BASE}/api/reports/${id}/download`,
+  reportUrl: (id: number) => `${base()}/api/reports/${id}/download`,
 };

@@ -3,15 +3,15 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 
 /**
- * On Netlify (NETLIFY=true) the API URL is baked into the static build, so a missing or
- * localhost VITE_API_BASE_URL would ship a site that cannot reach any backend. Fail the
- * build with an explanation instead.
+ * On Netlify (NETLIFY=true) an optional default backend URL is baked into the build. Leaving it
+ * unset is fine: visitors then connect at runtime (?api=<url> link or the "Connect" form). A
+ * localhost or plain-http default, however, would ship a site that cannot work, so it fails the build.
  */
 function checkDeployedApiUrl(mode: string) {
   if (process.env.NETLIFY !== "true") return;
   const url = (loadEnv(mode, process.cwd(), "VITE_").VITE_API_BASE_URL || process.env.VITE_API_BASE_URL || "").trim();
   const problem = !url
-    ? "VITE_API_BASE_URL is not set"
+    ? null
     : /\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:|\/|$)/.test(url)
       ? `VITE_API_BASE_URL points to ${url}, which visitors' browsers cannot reach`
       : !url.startsWith("https://")

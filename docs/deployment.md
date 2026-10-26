@@ -24,7 +24,28 @@ Free Spaces have no persistent disk and sleep after a period without visits. Aft
 
 If the Netlify site URL changes, set **Settings → Variables → `CORS_ORIGINS`** in the Space to the new `https://…netlify.app` origin, then restart the Space. After pushing new code to GitHub, use **Settings → Factory rebuild**.
 
-### Step 2: point the Netlify site at the backend
+### Connecting the site to a backend without rebuilding
+
+The site chooses its backend **in the browser**, so Netlify never needs rebuilding when the backend address changes:
+
+* open `https://mosaicappn.netlify.app/?api=https://<backend-address>`. The address is remembered in that browser and removed from the address bar; or
+* open the site and use the **Connect** form (or the connection menu in the header). "Copy shareable link" produces the `?api=` link for others.
+
+Only `https://` addresses are accepted (`http://` only for localhost). `VITE_API_BASE_URL` (step 2) is optional: it sets the default backend for visitors who arrive without a link.
+
+**Temporary demo without any account (backend on your laptop):**
+
+```bash
+python -m uvicorn app.main:app --app-dir backend --port 8000
+```
+
+```bash
+cloudflared tunnel --url http://localhost:8000
+```
+
+Share `https://mosaicappn.netlify.app/?api=<the https://….trycloudflare.com address it prints>`. The backend's `.env` must list the Netlify origin in `CORS_ORIGINS`. It works only while both commands run, and the tunnel address changes on every restart (send the new link).
+
+### Step 2: point the Netlify site at the backend (optional default)
 
 1. In Netlify, open the site and go to **Site configuration → Environment variables → Add a variable**.
 2. Set `VITE_API_BASE_URL` = `https://<hf-username>-mosaic-api.hf.space` (no trailing slash).

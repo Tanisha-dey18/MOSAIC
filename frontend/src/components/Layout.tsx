@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { api } from "../lib/api";
+import BackendConnect from "./BackendConnect";
 import { useApi } from "../lib/hooks";
 
 const NAV = [
@@ -16,6 +17,7 @@ const NAV = [
 
 export default function Layout() {
   const [open, setOpen] = useState(false);
+  const [backendOpen, setBackendOpen] = useState(false);
   const health = useApi(() => api.health(), []);
 
   const nav = (
@@ -40,7 +42,9 @@ export default function Layout() {
   );
 
   const status = health.error
-    ? { text: "API unreachable", cls: "bg-rose-500" }
+    ? health.error.code === "backend_not_configured"
+      ? { text: "Not connected", cls: "bg-slate-400" }
+      : { text: "API unreachable", cls: "bg-rose-500" }
     : health.data
       ? { text: health.data.status === "ok" ? "API online" : "API degraded", cls: health.data.status === "ok" ? "bg-emerald-400" : "bg-amber-400" }
       : { text: "Connecting…", cls: "bg-slate-400" };
@@ -66,10 +70,24 @@ export default function Layout() {
           </div>
           <div className="flex items-center gap-4 text-xs text-ink-soft">
             {health.data?.dataset.configured && <span className="hidden md:inline">Dataset: {health.data.dataset.name?.slice(0, 40)}… v{health.data.dataset.version}</span>}
-            <span className="flex items-center gap-2" role="status">
-              <span className={`h-2.5 w-2.5 rounded-full ${status.cls}`} aria-hidden />
-              {status.text}
-            </span>
+            <div className="relative">
+              <button
+                className="flex items-center gap-2 rounded-full px-2 py-1 hover:bg-slate-100"
+                role="status"
+                aria-expanded={backendOpen}
+                title="Backend connection"
+                onClick={() => setBackendOpen((v) => !v)}
+              >
+                <span className={`h-2.5 w-2.5 rounded-full ${status.cls}`} aria-hidden />
+                {status.text}
+                <span aria-hidden>▾</span>
+              </button>
+              {backendOpen && (
+                <div className="card absolute right-0 top-9 z-40 w-[min(26rem,calc(100vw-2rem))] p-4 shadow-lg">
+                  <BackendConnect compact />
+                </div>
+              )}
+            </div>
           </div>
         </header>
 

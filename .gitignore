@@ -48,3 +48,6 @@ reports/experiments/*
 Thumbs.db
 .idea/
 .vscode/
+
+# PDF build cache (formula/diagram images)
+docs/pdf/.render_cache/

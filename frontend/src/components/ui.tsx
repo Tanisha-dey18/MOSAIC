@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import type { ApiError } from "../lib/api";
+import BackendConnect from "./BackendConnect";
 
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: ReactNode; actions?: ReactNode }) {
   return (
@@ -81,6 +82,20 @@ export function Loading({ label = "Loading…" }: { label?: string }) {
 export function ErrorState({ error, onRetry }: { error: ApiError | Error; onRetry?: () => void }) {
   const code = "code" in error ? (error as ApiError).code : "error";
   if (code === "dataset_not_configured") return <NoDataset />;
+  if (code === "backend_not_configured" || code === "network_error") {
+    return (
+      <div className="card max-w-2xl p-6" role="alert">
+        <h2 className="text-base font-semibold">
+          {code === "network_error" ? "The MOSAIC backend is not reachable" : "Connect this site to a MOSAIC backend"}
+        </h2>
+        <p className="mb-4 mt-1 text-sm text-ink-soft">{error.message}</p>
+        <BackendConnect />
+        {onRetry && code === "network_error" && (
+          <button className="btn-secondary mt-4" onClick={onRetry}>Retry</button>
+        )}
+      </div>
+    );
+  }
   return (
     <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800" role="alert">
       <div className="font-semibold">Something went wrong</div>
